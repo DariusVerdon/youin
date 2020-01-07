@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -101,7 +102,9 @@ class SecondRoute extends StatelessWidget {
                     // Navigate to the actual event screen.
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => FourthRoute(document.documentID, document)),
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              FourthRoute(document.documentID, document)),
                     );
                   })),
         ],
@@ -140,7 +143,6 @@ class SecondRoute extends StatelessWidget {
   }
 }
 
-
 class FourthRoute extends StatelessWidget {
   final String barName;
   final DocumentSnapshot ds;
@@ -154,12 +156,12 @@ class FourthRoute extends StatelessWidget {
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text("Who's In?"),
-                  Text(ds.data['userEmail']),
-                  Text(ds.data['eventName']),
-                  Text(ds.data['location']),
-                  Text(ds.data['time']),
-                ])));
+              Text("Who's In?"),
+              Text(ds.data['userEmail']),
+              Text(ds.data['eventName']),
+              Text(ds.data['location']),
+              Text(ds.data['time']),
+            ])));
   }
 }
 
@@ -183,33 +185,31 @@ class ThirdRoute extends StatelessWidget {
           child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                TextFormField(
-                  controller: eventName,
-                  decoration:
+            TextFormField(
+              controller: eventName,
+              decoration:
                   InputDecoration(labelText: 'What\'s the event called?'),
-                ),
-                TextFormField(
-                  controller: location,
-                  decoration: InputDecoration(
-                      labelText: 'Where\'s it going down?'),
-                ),
-                TextFormField(
-                  controller: time,
-                  decoration: InputDecoration(
-                      labelText: 'When\'s it happening?'),
-                ),
-                FloatingActionButton(onPressed: () {
-                  createRecord(
-                      databaseReference, detailsUser, eventName, location,
-                      time);
-                  print("the record has been created");
-                }),
-              ])),
+            ),
+            TextFormField(
+              controller: location,
+              decoration: InputDecoration(labelText: 'Where\'s it going down?'),
+            ),
+            TextFormField(
+              controller: time,
+              decoration: InputDecoration(labelText: 'When\'s it happening?'),
+            ),
+            DropDown(),
+            FloatingActionButton(onPressed: () {
+              createRecord(
+                  databaseReference, detailsUser, eventName, location, time);
+              print("the record has been created");
+            }),
+          ])),
     );
   }
 
-  Future createRecord(databaseReference, detailsUser, eventName, location,
-      time) async {
+  Future createRecord(
+      databaseReference, detailsUser, eventName, location, time) async {
     await databaseReference
         .collection("events")
         .document(eventName.text)
@@ -222,3 +222,53 @@ class ThirdRoute extends StatelessWidget {
   }
 }
 
+class DropDown extends StatefulWidget {
+  const DropDown({ Key key }) : super(key: key);
+
+  @override
+  MakeBox createState() => MakeBox();
+}
+
+class MakeBox extends State<DropDown> {
+  var category;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: Firestore.instance.collection('users').snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData)
+            return Text("No Data!");
+          return DropdownButton<String>(
+            value: category,
+            isDense: true,
+            hint: Text('Who\'s Comin\'?'),
+            onChanged: (newValue) {
+              setState(() {
+                category = newValue;
+              });
+            },
+            items: snapshot.data != null
+                ? snapshot.data.documents
+                .map((DocumentSnapshot document) {
+              return new DropdownMenuItem<String>(
+                  value: document.data['userName'].toString(),
+                  child: new Container(
+                    height: 50.0,
+                    //color: primaryColor,
+                    child: new Text(
+                      document.data['userName'].toString(),
+                    ),
+                  ));
+            }).toList()
+                : DropdownMenuItem(
+              value: 'null',
+              child: new Container(
+                height: 50.0,
+                child: new Text('null'),
+              ),
+            ),
+          );
+        });
+  }
+}
