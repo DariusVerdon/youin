@@ -198,7 +198,8 @@ class ThirdRoute extends StatelessWidget {
               controller: time,
               decoration: InputDecoration(labelText: 'When\'s it happening?'),
             ),
-            DropDown(),
+
+            Text(Firestore.instance.document('users').documentID.length.toString()),
             FloatingActionButton(onPressed: () {
               createRecord(
                   databaseReference, detailsUser, eventName, location, time);
@@ -206,6 +207,9 @@ class ThirdRoute extends StatelessWidget {
             }),
           ])),
     );
+
+
+
   }
 
   Future createRecord(
@@ -219,6 +223,17 @@ class ThirdRoute extends StatelessWidget {
       'location': location.text,
       'time': time.text,
     });
+  }
+
+  Widget createUsers(eventName, chosen) {
+    for (var i in chosen)
+    Firestore.instance
+        .collection("events")
+        .document(eventName)
+        .setData({
+        i: true,
+    });
+    return Text("User Added");
   }
 }
 
@@ -271,4 +286,5 @@ class MakeBox extends State<DropDown> {
           );
         });
   }
+
 }
