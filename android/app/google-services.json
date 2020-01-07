@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "586557783275",
+    "firebase_url": "https://youin-cb4d2.firebaseio.com",
+    "project_id": "youin-cb4d2",
+    "storage_bucket": "youin-cb4d2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:586557783275:android:fc9d3be8b0a0ab906cd2ae",
+        "android_client_info": {
+          "package_name": "hensoncorp.you_in"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "586557783275-abfmo97pb9m27ap7v4dl6rdg46i7j3uc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoxXnOj2zqaRpQfOEnaAt6yyFg1R2DMsA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "586557783275-abfmo97pb9m27ap7v4dl6rdg46i7j3uc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
