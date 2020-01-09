@@ -7,8 +7,9 @@ import 'ProfileScreen.dart';
 
 class FirstRoute extends StatelessWidget {
   final UserDetails detailsUser;
+  final int numUsers;
 
-  FirstRoute({Key key, @required this.detailsUser}) : super(key: key);
+  FirstRoute({Key key, @required this.detailsUser, @required this.numUsers}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +36,7 @@ class FirstRoute extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => ThirdRoute(detailsUser)),
+                          builder: (context) => ThirdRoute(detailsUser, numUsers)),
                     );
                     //createRecord(databaseReference, detailsUser);
                     print("Moving to create record page.");
@@ -173,7 +174,9 @@ class ThirdRoute extends StatelessWidget {
   final databaseReference = Firestore.instance;
   final UserDetails detailsUser;
 
-  ThirdRoute(this.detailsUser);
+  final int numUsers;
+
+  ThirdRoute(this.detailsUser, this.numUsers);
 
   @override
   Widget build(BuildContext context) {
@@ -198,8 +201,7 @@ class ThirdRoute extends StatelessWidget {
               controller: time,
               decoration: InputDecoration(labelText: 'When\'s it happening?'),
             ),
-
-            Text(Firestore.instance.document('users').documentID.length.toString()),
+                for (var i = 0; i < numUsers -1; i++) DropDown(),
             FloatingActionButton(onPressed: () {
               createRecord(
                   databaseReference, detailsUser, eventName, location, time);
@@ -277,10 +279,10 @@ class MakeBox extends State<DropDown> {
                   ));
             }).toList()
                 : DropdownMenuItem(
-              value: 'null',
+              value: 'Leave Blank',
               child: new Container(
                 height: 50.0,
-                child: new Text('null'),
+                child: new Text('Leave Blankyo'),
               ),
             ),
           );

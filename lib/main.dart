@@ -35,6 +35,8 @@ class _GoogleSignAppState extends State<GoogleSignApp> {
 
   final db = Firestore.instance;
 
+
+
   Future<FirebaseUser> _signIn(BuildContext context) async {
 
     Scaffold.of(context).showSnackBar(new SnackBar(
@@ -70,11 +72,20 @@ class _GoogleSignAppState extends State<GoogleSignApp> {
       providerData,
     );
 
-    createUser(db, details);
+    final snapShot = await Firestore.instance.collection('users').document(details.userName).get();
+
+
+    if (!snapShot.exists){
+      createUser(db, details);
+      print("Created User.");
+    }
+    final snapShot2 = await Firestore.instance.collection('users').document('metaData').get();
+    final numUsers = snapShot2.data['userTotal'];
+
     Navigator.push(
       context,
       new MaterialPageRoute(
-        builder: (context) => FirstRoute(detailsUser: details),//new ProfileScreen(detailsUser: details),
+        builder: (context) => FirstRoute(detailsUser: details, numUsers: numUsers),//new ProfileScreen(detailsUser: details),
       ),
     );
     return userDetails;
@@ -154,6 +165,7 @@ class ProviderDetails {
 }
 
 Future createUser(databaseReference, detailsUser) async {
+  var increment = await Firestore.instance.collection('users').document('metaData').get();
   await databaseReference
       .collection("users")
       .document(detailsUser.userName)
@@ -161,8 +173,13 @@ Future createUser(databaseReference, detailsUser) async {
     'userName': detailsUser.userName,
     'userEmail': detailsUser.userEmail,
     'photo': detailsUser.photoUrl,
-    'loginTime': DateTime.now(),
-
+    'created': DateTime.now(),
+  });
+  await databaseReference
+  .collection("users")
+  .document("metaData")
+  .updateData({
+    'userTotal': increment.data['userTotal'] + 1,
   });
 
 }
