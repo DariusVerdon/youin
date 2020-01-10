@@ -36,7 +36,7 @@ class FirstRoute extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => ThirdRoute(detailsUser, numUsers)),
+                          builder: (context) => MainThird(detailsUser, numUsers)),
                     );
                     //createRecord(databaseReference, detailsUser);
                     print("Moving to create record page.");
@@ -166,14 +166,23 @@ class FourthRoute extends StatelessWidget {
   }
 }
 
-class ThirdRoute extends StatelessWidget {
+class MainThird extends StatefulWidget {
+  final detailsUser;
+  final numUsers;
+  MainThird(this.detailsUser, this.numUsers);
+
+  ThirdRoute createState() => ThirdRoute(detailsUser, numUsers);
+
+}
+
+class ThirdRoute extends State<MainThird> {
   final eventName = TextEditingController();
   final location = TextEditingController();
   final time = TextEditingController();
 
   final databaseReference = Firestore.instance;
   final UserDetails detailsUser;
-
+  var category;
   final int numUsers;
 
   ThirdRoute(this.detailsUser, this.numUsers);
@@ -201,13 +210,63 @@ class ThirdRoute extends StatelessWidget {
               controller: time,
               decoration: InputDecoration(labelText: 'When\'s it happening?'),
             ),
-                for (var i = 0; i < numUsers -1; i++) DropDown(),
+                for (var i = 0; i < numUsers -1; i++) new DropDown(eventName),
+               /* FormField(
+                  builder: (FormFieldState state) {
+                  return InputDecorator(
+                    decoration: InputDecoration(
+                    icon: const Icon(Icons.color_lens),
+                    labelText: 'Color',
+                      ),
+                    child: new StreamBuilder(
+                      stream: Firestore.instance.collection('users').snapshots(),
+                      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                        if (!snapshot.hasData)
+                          return Text("No Data!");
+                        return DropdownButtonFormField<String>(
+                          value: category,
+                          isDense: true,
+                          hint: Text('Who\'s Comin\'?'),
+                          onChanged: (newValue) {
+                            setState(() {
+                              category = newValue;
+                            });
+                          },
+                          items: snapshot.data != null
+                              ? snapshot.data.documents
+                              .map((DocumentSnapshot document) {
+                            return new DropdownMenuItem<String>(
+                                value: document.data['userName'].toString(),
+                                child: new Container(
+                                  height: 50.0,
+                                  //color: primaryColor,
+                                  child: new Text(
+                                    document.data['userName'].toString(),
+                                  ),
+                                ));
+                          }).toList()
+                              : new DropdownMenuItem(
+                                value: 'Leave Blank',
+                                child: new Container(
+                                height: 50.0,
+                                child: new Text('Leave Blank'),
+                            ),
+                          ),
+                        );
+
+                      })
+                  );
+                  },
+                ),
+
+                */
             FloatingActionButton(onPressed: () {
               createRecord(
                   databaseReference, detailsUser, eventName, location, time);
               print("the record has been created");
             }),
           ])),
+
     );
 
 
@@ -227,66 +286,77 @@ class ThirdRoute extends StatelessWidget {
     });
   }
 
-  Widget createUsers(eventName, chosen) {
-    for (var i in chosen)
-    Firestore.instance
-        .collection("events")
-        .document(eventName)
-        .setData({
-        i: true,
-    });
-    return Text("User Added");
-  }
 }
 
 class DropDown extends StatefulWidget {
-  const DropDown({ Key key }) : super(key: key);
-
+  final databaseReference = Firestore.instance;
+  final eventName;
+  DropDown(this.eventName);
   @override
-  MakeBox createState() => MakeBox();
+  MakeBox createState() => MakeBox(eventName);
+
 }
 
 class MakeBox extends State<DropDown> {
   var category;
-
+  var eventName;
+  MakeBox(this.eventName);
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: Firestore.instance.collection('users').snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData)
-            return Text("No Data!");
-          return DropdownButton<String>(
-            value: category,
-            isDense: true,
-            hint: Text('Who\'s Comin\'?'),
-            onChanged: (newValue) {
-              setState(() {
-                category = newValue;
-              });
-            },
-            items: snapshot.data != null
-                ? snapshot.data.documents
-                .map((DocumentSnapshot document) {
-              return new DropdownMenuItem<String>(
-                  value: document.data['userName'].toString(),
-                  child: new Container(
-                    height: 50.0,
-                    //color: primaryColor,
-                    child: new Text(
-                      document.data['userName'].toString(),
-                    ),
-                  ));
-            }).toList()
-                : DropdownMenuItem(
-              value: 'Leave Blank',
-              child: new Container(
-                height: 50.0,
-                child: new Text('Leave Blankyo'),
-              ),
+    return FormField(
+      builder: (FormFieldState state) {
+        return InputDecorator(
+            decoration: InputDecoration(
+              icon: const Icon(Icons.color_lens),
+              labelText: 'Color',
             ),
-          );
-        });
-  }
+            child: new StreamBuilder(
+                stream: Firestore.instance.collection('users').snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (!snapshot.hasData)
+                    return Text("No Data!");
+                  return DropdownButtonFormField<String>(
+                    value: category,
+                    isDense: true,
+                    hint: Text('Who\'s Comin\'?'),
+                    onChanged: (newValue) {
+                      setState(() {
+                        category = newValue;
+                      });
+                    },
+                    items: snapshot.data != null
+                        ? snapshot.data.documents
+                        .map((DocumentSnapshot document) {
+                      return new DropdownMenuItem<String>(
+                          value: document.data['userName'].toString(),
+                          child: new Container(
+                            height: 50.0,
+                            //color: primaryColor,
+                            child: new Text(
+                              document.data['userName'].toString(),
+                            ),
+                          ));
+                    }).toList()
+                        : new DropdownMenuItem(
+                      value: 'Leave Blank',
+                      child: new Container(
+                        height: 50.0,
+                        child: new Text('Leave Blank'),
+                      ),
+                    ),
+                  );
 
+                })
+        );
+      },
+    );
+  }
+  Future createUser(eventName, category) async {
+    await Firestore.instance
+        .collection("events")
+        .document(eventName)
+        .setData({
+      category: "invited",
+    });
+  }
 }
