@@ -9,7 +9,8 @@ class FirstRoute extends StatelessWidget {
   final UserDetails detailsUser;
   final int numUsers;
 
-  FirstRoute({Key key, @required this.detailsUser, @required this.numUsers}) : super(key: key);
+  FirstRoute({Key key, @required this.detailsUser, @required this.numUsers})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,8 @@ class FirstRoute extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => MainThird(detailsUser, numUsers)),
+                          builder: (context) =>
+                              MainThird(detailsUser, numUsers, ["Empty"])),
                     );
                     //createRecord(databaseReference, detailsUser);
                     print("Moving to create record page.");
@@ -169,10 +171,10 @@ class FourthRoute extends StatelessWidget {
 class MainThird extends StatefulWidget {
   final detailsUser;
   final numUsers;
-  MainThird(this.detailsUser, this.numUsers);
+  final listUsers;
+  MainThird(this.detailsUser, this.numUsers, this.listUsers);
 
-  ThirdRoute createState() => ThirdRoute(detailsUser, numUsers);
-
+  ThirdRoute createState() => ThirdRoute(detailsUser, numUsers, listUsers);
 }
 
 class ThirdRoute extends State<MainThird> {
@@ -183,9 +185,11 @@ class ThirdRoute extends State<MainThird> {
   final databaseReference = Firestore.instance;
   final UserDetails detailsUser;
   var category;
+  var currentIndex;
+  var listUsers = ["Before"];
   final int numUsers;
-
-  ThirdRoute(this.detailsUser, this.numUsers);
+  List userNames;
+  ThirdRoute(this.detailsUser, this.numUsers, this.listUsers);
 
   @override
   Widget build(BuildContext context) {
@@ -210,8 +214,22 @@ class ThirdRoute extends State<MainThird> {
               controller: time,
               decoration: InputDecoration(labelText: 'When\'s it happening?'),
             ),
-                for (var i = 0; i < numUsers -1; i++) new DropDown(eventName),
-               /* FormField(
+            Text(listUsers.toString()),
+            RaisedButton(
+              onPressed: () {
+                listUsers.add("Another!");
+                // Navigate to the event pending screen.
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          DropDown(eventName, userNames, currentIndex, detailsUser, numUsers)),
+                );
+                currentIndex += 1;
+              },
+              child: Text('Add Someone'),
+            ),
+            /* FormField(
                   builder: (FormFieldState state) {
                   return InputDecorator(
                     decoration: InputDecoration(
@@ -266,11 +284,7 @@ class ThirdRoute extends State<MainThird> {
               print("the record has been created");
             }),
           ])),
-
     );
-
-
-
   }
 
   Future createRecord(
@@ -285,77 +299,106 @@ class ThirdRoute extends State<MainThird> {
       'time': time.text,
     });
   }
-
 }
 
 class DropDown extends StatefulWidget {
   final databaseReference = Firestore.instance;
   final eventName;
-  DropDown(this.eventName);
-  @override
-  MakeBox createState() => MakeBox(eventName);
+  final List<String> listUsers;
+  final curIndex;
+  final detailsUser;
+  final numUsers;
 
+  DropDown(this.eventName, this.listUsers, this.curIndex, this.detailsUser, this.numUsers);
+  @override
+  MakeBox createState() => MakeBox(eventName, listUsers, curIndex, this.detailsUser, this.numUsers);
 }
 
 class MakeBox extends State<DropDown> {
+  final detailsUser;
+  final numUsers;
   var category;
   var eventName;
-  MakeBox(this.eventName);
+  int curIndex;
+  List<String> listUsers;
+  MakeBox(this.eventName, this.listUsers, this.curIndex, this.detailsUser, this.numUsers);
   @override
   Widget build(BuildContext context) {
-    return FormField(
-      builder: (FormFieldState state) {
-        return InputDecorator(
-            decoration: InputDecoration(
-              icon: const Icon(Icons.color_lens),
-              labelText: 'Color',
-            ),
-            child: new StreamBuilder(
-                stream: Firestore.instance.collection('users').snapshots(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (!snapshot.hasData)
-                    return Text("No Data!");
-                  return DropdownButtonFormField<String>(
-                    value: category,
-                    isDense: true,
-                    hint: Text('Who\'s Comin\'?'),
-                    onChanged: (newValue) {
-                      setState(() {
-                        category = newValue;
-                      });
-                    },
-                    items: snapshot.data != null
-                        ? snapshot.data.documents
-                        .map((DocumentSnapshot document) {
-                      return new DropdownMenuItem<String>(
-                          value: document.data['userName'].toString(),
-                          child: new Container(
-                            height: 50.0,
-                            //color: primaryColor,
-                            child: new Text(
-                              document.data['userName'].toString(),
-                            ),
-                          ));
-                    }).toList()
-                        : new DropdownMenuItem(
-                      value: 'Leave Blank',
-                      child: new Container(
-                        height: 50.0,
-                        child: new Text('Leave Blank'),
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Who's comin'?"),
+        ),
+        body: Center(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+              Text("Here's the list."),
+              FormField(
+                builder: (FormFieldState state) {
+                  return InputDecorator(
+                      decoration: InputDecoration(
+                        icon: const Icon(Icons.arrow_drop_down),
+                        labelText: 'Color',
                       ),
-                    ),
-                  );
-
-                })
-        );
-      },
-    );
+                      child: new StreamBuilder(
+                          stream: Firestore.instance
+                              .collection('users')
+                              .snapshots(),
+                          builder:
+                              (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (!snapshot.hasData) return Text("No Data!");
+                            return DropdownButtonFormField<String>(
+                              value: category,
+                              isDense: true,
+                              hint: Text('Who\'s Comin\'?'),
+                              onChanged: (newValue) {
+                                setState(() {
+                                  category = newValue;
+                                  listUsers[curIndex] = category;
+                                });
+                              },
+                              items: snapshot.data != null
+                                  ? snapshot.data.documents
+                                      .map((DocumentSnapshot document) {
+                                      return new DropdownMenuItem<String>(
+                                          value: document.data['userName']
+                                              .toString(),
+                                          child: new Container(
+                                            height: 50.0,
+                                            //color: primaryColor,
+                                            child: new Text(
+                                              document.data['userName']
+                                                  .toString(),
+                                            ),
+                                          ));
+                                    }).toList()
+                                  : new DropdownMenuItem(
+                                      value: 'Leave Blank',
+                                      child: new Container(
+                                        height: 50.0,
+                                        child: new Text('Leave Blank'),
+                                      ),
+                                    ),
+                            );
+                          }));
+                },
+              ),
+                  FloatingActionButton(
+                    onPressed: () {
+                      print(listUsers);
+                      listUsers.add("WHAOOOOOOOA");
+                    Navigator.pop(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                             MainThird(detailsUser, numUsers, listUsers)),
+                    );
+                  },)
+            ])));
   }
+
   Future createUser(eventName, category) async {
-    await Firestore.instance
-        .collection("events")
-        .document(eventName)
-        .setData({
+    await Firestore.instance.collection("events").document(eventName).setData({
       category: "invited",
     });
   }
