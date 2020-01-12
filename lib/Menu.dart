@@ -38,7 +38,7 @@ class FirstRoute extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              MainThird(detailsUser, numUsers, ["Empty"])),
+                              MainThird(detailsUser: detailsUser, numUsers: numUsers, listUsers: <String>["NULL"], curIndex: 0)),
                     );
                     //createRecord(databaseReference, detailsUser);
                     print("Moving to create record page.");
@@ -172,7 +172,9 @@ class MainThird extends StatefulWidget {
   final detailsUser;
   final numUsers;
   final listUsers;
-  MainThird(this.detailsUser, this.numUsers, this.listUsers);
+  final curIndex;
+
+  MainThird({this.detailsUser, this.numUsers, this.listUsers, this.curIndex});
 
   ThirdRoute createState() => ThirdRoute(detailsUser, numUsers, listUsers);
 }
@@ -185,10 +187,9 @@ class ThirdRoute extends State<MainThird> {
   final databaseReference = Firestore.instance;
   final UserDetails detailsUser;
   var category;
-  var currentIndex;
-  var listUsers = ["Before"];
-  final int numUsers;
-  List userNames;
+  int currentIndex = 0;
+  List<String> listUsers;
+  int numUsers;
   ThirdRoute(this.detailsUser, this.numUsers, this.listUsers);
 
   @override
@@ -217,72 +218,24 @@ class ThirdRoute extends State<MainThird> {
             Text(listUsers.toString()),
             RaisedButton(
               onPressed: () {
-                listUsers.add("Another!");
-                // Navigate to the event pending screen.
+                // Navigate to the user selection screen.
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
-                          DropDown(eventName, userNames, currentIndex, detailsUser, numUsers)),
+                          DropDown(eventName, listUsers, currentIndex, detailsUser, numUsers)),
                 );
                 currentIndex += 1;
               },
               child: Text('Add Someone'),
             ),
-            /* FormField(
-                  builder: (FormFieldState state) {
-                  return InputDecorator(
-                    decoration: InputDecoration(
-                    icon: const Icon(Icons.color_lens),
-                    labelText: 'Color',
-                      ),
-                    child: new StreamBuilder(
-                      stream: Firestore.instance.collection('users').snapshots(),
-                      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                        if (!snapshot.hasData)
-                          return Text("No Data!");
-                        return DropdownButtonFormField<String>(
-                          value: category,
-                          isDense: true,
-                          hint: Text('Who\'s Comin\'?'),
-                          onChanged: (newValue) {
-                            setState(() {
-                              category = newValue;
-                            });
-                          },
-                          items: snapshot.data != null
-                              ? snapshot.data.documents
-                              .map((DocumentSnapshot document) {
-                            return new DropdownMenuItem<String>(
-                                value: document.data['userName'].toString(),
-                                child: new Container(
-                                  height: 50.0,
-                                  //color: primaryColor,
-                                  child: new Text(
-                                    document.data['userName'].toString(),
-                                  ),
-                                ));
-                          }).toList()
-                              : new DropdownMenuItem(
-                                value: 'Leave Blank',
-                                child: new Container(
-                                height: 50.0,
-                                child: new Text('Leave Blank'),
-                            ),
-                          ),
-                        );
 
-                      })
-                  );
-                  },
-                ),
-
-                */
             FloatingActionButton(onPressed: () {
-              createRecord(
-                  databaseReference, detailsUser, eventName, location, time);
+              createRecord(databaseReference, detailsUser, eventName, location, time);
               print("the record has been created");
+              for (var i = 0; i < listUsers.length; i++) addingUser(listUsers[i].toString(), eventName);
             }),
+
           ])),
     );
   }
@@ -298,6 +251,19 @@ class ThirdRoute extends State<MainThird> {
       'location': location.text,
       'time': time.text,
     });
+  }
+
+  Future addUser(
+      username, eventName
+      ) async{
+    await Firestore.instance.collection("events").document(eventName.text).updateData({
+      username: "invited",
+    });
+  }
+
+  Widget addingUser(username, eventName) {
+    addUser(username, eventName);
+    return Text(username + " has been invited.");
   }
 }
 
@@ -354,7 +320,6 @@ class MakeBox extends State<DropDown> {
                               onChanged: (newValue) {
                                 setState(() {
                                   category = newValue;
-                                  listUsers[curIndex] = category;
                                 });
                               },
                               items: snapshot.data != null
@@ -385,13 +350,13 @@ class MakeBox extends State<DropDown> {
               ),
                   FloatingActionButton(
                     onPressed: () {
-                      print(listUsers);
-                      listUsers.add("WHAOOOOOOOA");
+                      listUsers[curIndex] = category;
+                      curIndex += 1;
                     Navigator.pop(
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                             MainThird(detailsUser, numUsers, listUsers)),
+                             MainThird(detailsUser: detailsUser, numUsers: numUsers, listUsers: listUsers, curIndex: curIndex)),
                     );
                   },)
             ])));
