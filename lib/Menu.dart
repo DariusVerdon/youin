@@ -225,7 +225,7 @@ class ThirdRoute extends State<MainThird> {
                       builder: (context) =>
                           DropDown(eventName, listUsers, currentIndex, detailsUser, numUsers)),
                 );
-                currentIndex += 1;
+              //  currentIndex += 1;
               },
               child: Text('Add Someone'),
             ),
@@ -237,6 +237,16 @@ class ThirdRoute extends State<MainThird> {
             }),
 
           ])),
+    );
+  }
+
+  Future pushUser(currentIndex) async{
+    currentIndex = await
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              DropDown(eventName, listUsers, currentIndex, detailsUser, numUsers)),
     );
   }
 
@@ -350,8 +360,12 @@ class MakeBox extends State<DropDown> {
               ),
                   FloatingActionButton(
                     onPressed: () {
-                      listUsers[curIndex] = category;
-                      curIndex += 1;
+                      if(listUsers[0] == "NULL"){
+                        listUsers.remove("NULL");
+                        listUsers.add(category);
+                      }else{
+                        listUsers.add(category);
+                      }
                     Navigator.pop(
                       context,
                       MaterialPageRoute(
