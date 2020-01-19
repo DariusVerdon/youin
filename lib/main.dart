@@ -48,10 +48,8 @@ class _GoogleSignAppState extends State<GoogleSignApp> {
 
     final AuthCredential credential = GoogleAuthProvider.getCredential(
       accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
     );
-
-
-
     var name = db.collection("users").toString();
 
 
@@ -79,6 +77,7 @@ class _GoogleSignAppState extends State<GoogleSignApp> {
       createUser(db, details);
       print("Created User.");
     }
+
     final snapShot2 = await Firestore.instance.collection('users').document('metaData').get();
     final numUsers = snapShot2.data['userTotal'];
 
