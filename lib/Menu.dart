@@ -86,7 +86,7 @@ class SecondRoute extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              "Events:",
+              "",
               style: Theme.of(context).textTheme.headline,
             ),
           ),
@@ -127,7 +127,7 @@ class SecondRoute extends StatelessWidget {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text("Pending"),
+        title: Text("Pending Events"),
       ),
       body: StreamBuilder(
           stream: Firestore.instance.collection('events').snapshots(),
@@ -160,6 +160,7 @@ class FourthRoute extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
               Text("Who's In?"),
+            //for (var i = 0; i < listUsers.length; i++) addingUser(listUsers[i].toString(), eventName);
               Text(ds.data['userEmail']),
               Text(ds.data['eventName']),
               Text(ds.data['location']),
@@ -336,13 +337,13 @@ class MakeBox extends State<DropDown> {
                                   ? snapshot.data.documents
                                       .map((DocumentSnapshot document) {
                                       return new DropdownMenuItem<String>(
-                                          value: document.data['userName']
-                                              .toString(),
+                                          value: document.data['userName'].collection['friends'].
+                                              toString(),
                                           child: new Container(
                                             height: 50.0,
                                             //color: primaryColor,
                                             child: new Text(
-                                              document.data['userName']
+                                              document.data['userName'].collection['friends']
                                                   .toString(),
                                             ),
                                           ));
