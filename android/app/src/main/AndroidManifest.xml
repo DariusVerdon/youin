@@ -9,7 +9,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="you_in"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -22,7 +22,8 @@
                  there is no splash screen (such as the default splash screen
                  defined in @style/LaunchTheme). -->
             <meta-data
-                android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
+                android:name="io.flutter.embedding.android.SplashScreenDrawable"
+                android:resource="@drawable/youin_logo"
                 android:value="true" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
